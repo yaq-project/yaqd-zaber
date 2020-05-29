@@ -61,16 +61,21 @@ class ZaberBinary(ContinuousHardware):
             self.logger.debug(reply)
             # Commands which reply with the current position
             if reply.command_number in (20, 18, 23,78,9,11,13,21,1,8,10,12, 60):
-                if reply.command_number in (8, 10, 12):
+                self._position = reply.data
+                if reply.command_number in (10, 12):
                     self._busy = True
+                    self._destination = reply.data
                     self._serial.write(BinaryCommand(self._axis, 54))
+                elif reply.command_number == 8:
+                    continue
                 else:
                     self._busy = False
-                self._position = reply.data
             elif reply.command_number == 54:
                 self._busy = reply.data != 0
             elif reply.command_number == 255:
                 self.logger.error(f"Error Code: {reply.data}")
+            else:
+                self.logger.info(f"Unhandled reply: {reply}")
 
 
 
