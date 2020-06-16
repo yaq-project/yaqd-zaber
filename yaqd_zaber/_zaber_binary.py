@@ -26,9 +26,10 @@ class ZaberBinary(ContinuousHardware):
             ZaberBinary.serial_dispatchers[config["serial_port"]] = self._serial
         self._read_queue = asyncio.Queue()
         self._serial.workers[self._axis] = self._read_queue
-
         super().__init__(name, config, config_filepath)
         self._home_event = asyncio.Event()
+        self._device_mode = 0
+        self._serial.write(BinaryCommand(self._axis, 53, 40))
 
     def _set_position(self, position):
         self._serial.write(BinaryCommand(self._axis, 20, round(position)))
@@ -61,6 +62,8 @@ class ZaberBinary(ContinuousHardware):
                     continue
                 else:
                     self._busy = False
+            elif reply.command_number == 53:
+                self._device_mode = reply.data
             elif reply.command_number == 54:
                 self._busy = reply.data != 0
             elif reply.command_number == 255:
@@ -68,7 +71,17 @@ class ZaberBinary(ContinuousHardware):
             else:
                 self.logger.info(f"Unhandled reply: {reply}")
 
-
+    def set_knob(self, enable):
+        # Newer firmwares have a dedicated command (CMD 107), but this implementation works 
+        # in older firmwares as well as newer.
+        # Zaber may remove the set_mode (CMD 40) at some point (they discourage its use)
+        # KFS 2020-06-16
+        knob_bit = 1 << 3
+        if enable:
+            self._serial.write(BinaryCommand(self._axis, 40, self._device_mode & ~knob_bit))
+        else:
+            self._serial.write(BinaryCommand(self._axis, 40, self._device_mode | knob_bit))
+        self._serial.write(BinaryCommand(self._axis, 53, 40))
 
     def direct_serial_write(self, command):
         self._busy = True

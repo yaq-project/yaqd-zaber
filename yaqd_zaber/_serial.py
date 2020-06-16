@@ -25,20 +25,25 @@ class SerialDispatcher:
             logger.debug(f"write pop {data}")
             self.port.write(data)
             self.write_queue.task_done()
-            await asyncio.sleep(0.001)
+            await asyncio.sleep(0.01)
 
     async def read_dispatch(self):
+        count = 0
         while True:
+            logger.debug(count)
+            count += 1
             try:
                 if self.port.can_read():
                     reply = self.port.read()
                 else:
+                    if self.port._ser.in_waiting:
+                        logger.debug(self.port._ser.in_waiting)
                     raise TimeoutError
             except TimeoutError:
-                await asyncio.sleep(0.001)
+                await asyncio.sleep(0.01)
             except exception as e:
                 logger.error(e)
-                await asyncio.sleep(0.001)
+                await asyncio.sleep(0.01)
             else:
                 logger.debug(reply)
                 if reply.device_number in self.workers:
@@ -55,8 +60,5 @@ class SerialDispatcher:
         self.loop.create_task(self._close())
 
     async def _close(self):
-        await self.write_queue.join()
-        for worker in self.workers.values():
-            await worker.join()
         for task in self.tasks:
             task.cancel()
