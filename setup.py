@@ -25,7 +25,7 @@ setup(
     author_email="git@ksunden.space",
     python_requires=">=3.7",
     classifiers=[
-        "Development Status :: 2 - Pre-Alpha",
+        "Development Status :: 3 - Alpha",
         "Intended Audience :: Science/Research",
         "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
         "Natural Language :: English",
@@ -36,9 +36,7 @@ setup(
     ],
     description="yaq daemons for Zaber Technologies products",
     entry_points={
-        "console_scripts": [
-            "yaqd-zaber-binary=yaqd_zaber._zaber_binary:ZaberBinary.main",
-        ],
+        "console_scripts": ["yaqd-zaber-binary=yaqd_zaber._zaber_binary:ZaberBinary.main",],
     },
     install_requires=requirements,
     extras_require=extra_requirements,
