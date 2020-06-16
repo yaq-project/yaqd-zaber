@@ -4,7 +4,7 @@ import asyncio
 from typing import Dict, Any, List
 
 from yaqd_core import ContinuousHardware
-from zaber.serial import BinarySerial, BinaryCommand
+from zaber.serial import BinarySerial, BinaryCommand  # type: ignore
 
 from .__version__ import __branch__
 from ._serial import SerialDispatcher
@@ -28,9 +28,7 @@ class ZaberBinary(ContinuousHardware):
         self._serial.workers[self._axis] = self._read_queue
 
         super().__init__(name, config, config_filepath)
-
-        self._tasks.append(self._loop.create_task(self._consume_from_serial()))
-
+        self._home_event = asyncio.Event()
 
     def _set_position(self, position):
         self._serial.write(BinaryCommand(self._axis, 20, round(position)))
@@ -41,21 +39,12 @@ class ZaberBinary(ContinuousHardware):
     async def _home(self):
         self._busy = True
         self._serial.write(BinaryCommand(self._axis, 1))
-        await self._not_busy_sig.wait()
+        await self._home_event.wait()
+        self._home_event.clear()
         self.set_position(self._destination)
 
     async def update_state(self):
         """Continually monitor and update the current daemon state."""
-        # If there is no state to monitor continuously, delete this function
-        return
-        while True:
-            self._serial.write(BinaryCommand(self._axis, 54))
-            if self._busy:
-                await asyncio.sleep(0.1)
-            else:
-                await self._busy_sig.wait()
-
-    async def _consume_from_serial(self):
         while True:
             reply = await self._read_queue.get()
             self.logger.debug(reply)
@@ -66,6 +55,8 @@ class ZaberBinary(ContinuousHardware):
                     self._busy = True
                     self._destination = reply.data
                     self._serial.write(BinaryCommand(self._axis, 54))
+                elif reply.command_number == 1:
+                    self._home_event.set()
                 elif reply.command_number == 8:
                     continue
                 else:
