@@ -2,6 +2,7 @@ import asyncio
 import re
 
 from yaqd_core import aserial, logging
+
 logger = logging.getLogger("serial")
 
 
