@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Changed
+- Use Apache Avro as specified in [YEP-107](https://yeps.yaq.fyi/107/)
+- Use flit to build releases
+
 ## [2020.06.0]
 
 ### Added

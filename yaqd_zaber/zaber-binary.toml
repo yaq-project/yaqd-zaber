@@ -1,0 +1,25 @@
+protocol = "zaber-binary"
+doc = """
+Daemon for products using Zaber Technologies binary serial interface
+"""
+traits = ["has-limits", "is-homeable", "uses-uart", "is-daemon"]
+
+[links]
+source = "https://gitlab.com/yaq/yaqd-zaber/"
+bugtracker = "https://gitlab.com/yaq/yaqd-zaber/issues"
+manufacturer = "https://www.zaber.com/wiki/Manuals/Binary_Protocol_Manual"
+
+[config]
+axis.type = "int"
+axis.doc = "Axis which identifies the device represented"
+
+baud_rate.default = 9600
+make.default = "Zaber"
+
+[messages]
+[messages.set_knob]
+doc="Enable or disable the physical knob interface"
+request=[{"name"="enable", "type"="boolean"}]
+
+[installation]
+PyPI = "https://pypi.org/project/yaqd-thorlabs"

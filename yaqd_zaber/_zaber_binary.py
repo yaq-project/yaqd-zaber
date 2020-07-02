@@ -6,15 +6,11 @@ from typing import Dict, Any, List
 from yaqd_core import ContinuousHardware
 from zaber.serial import BinarySerial, BinaryCommand  # type: ignore
 
-from .__version__ import __branch__
 from ._serial import SerialDispatcher
 
 
 class ZaberBinary(ContinuousHardware):
     _kind = "zaber-binary"
-    _version = "0.1.0" + f"+{__branch__}" if __branch__ else ""
-    traits: List[str] = []
-    defaults: Dict[str, Any] = {"baud_rate": 9600}
     serial_dispatchers: Dict[str, SerialDispatcher] = {}
 
     def __init__(self, name, config, config_filepath):
@@ -33,7 +29,9 @@ class ZaberBinary(ContinuousHardware):
         super().__init__(name, config, config_filepath)
         self._home_event = asyncio.Event()
         self._device_mode = 0
-        self._serial.write(BinaryCommand(self._axis, 53, 40))
+        self._serial.write(BinaryCommand(self._axis, 53, 40))  # device mode
+        self._serial.write(BinaryCommand(self._axis, 53, 44))  # max position
+        self._serial.write(BinaryCommand(self._axis, 53, 106))  # min position
 
     def _set_position(self, position):
         self._serial.write(BinaryCommand(self._axis, 20, round(position)))
@@ -46,7 +44,7 @@ class ZaberBinary(ContinuousHardware):
         self._serial.write(BinaryCommand(self._axis, 1))
         await self._home_event.wait()
         self._home_event.clear()
-        self.set_position(self._destination)
+        self.set_position(self._state["destination"])
 
     async def update_state(self):
         """Continually monitor and update the current daemon state."""
@@ -55,10 +53,10 @@ class ZaberBinary(ContinuousHardware):
             self.logger.debug(reply)
             # Commands which reply with the current position
             if reply.command_number in (20, 18, 23, 78, 9, 11, 13, 21, 1, 8, 10, 12, 60):
-                self._position = reply.data
+                self._state["position"] = reply.data
                 if reply.command_number in (10, 12):
                     self._busy = True
-                    self._destination = reply.data
+                    self._state["destination"] = reply.data
                     self._serial.write(BinaryCommand(self._axis, 54))
                 elif reply.command_number == 1:
                     self._home_event.set()
@@ -70,6 +68,10 @@ class ZaberBinary(ContinuousHardware):
                 self._device_mode = reply.data
             elif reply.command_number == 54:
                 self._busy = reply.data != 0
+            elif reply.command_number == 106:
+                self._state["hw_limits"][0] = reply.data
+            elif reply.command_number == 44:
+                self._state["hw_limits"][1] = reply.data
             elif reply.command_number == 255:
                 self.logger.error(f"Error Code: {reply.data}")
             else:
@@ -92,13 +94,12 @@ class ZaberBinary(ContinuousHardware):
             )
         self._serial.write(BinaryCommand(self._axis, 53, 40))
 
-    def direct_serial_write(self, command):
+    def direct_serial_write(self, command: bytes):
         self._busy = True
-        command = bytes(command, "UTF-8")
         if len(command) <= 5:
             command = bytes([self._axis]) + command
         command = command.ljust(6, b"\0")
-        self._serial.write(command.decode("UTF-8"))
+        self._serial.write(command.decode("UTF-8"))  # zaber lib doesn't accept bytes
 
     def close(self):
         self._serial.flush()
