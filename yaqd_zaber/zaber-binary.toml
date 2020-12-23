@@ -22,4 +22,6 @@ doc="Enable or disable the physical knob interface"
 request=[{"name"="enable", "type"="boolean"}]
 
 [installation]
-PyPI = "https://pypi.org/project/yaqd-thorlabs"
+PyPI = "https://pypi.org/project/yaqd-zaber"
+
+
