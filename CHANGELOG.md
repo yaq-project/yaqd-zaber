@@ -32,7 +32,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 ### Added
 - initial release
 
-[Unreleased]: https://gitlab.com/yaq/yaqd-zaber/-/compare/v2021.10.0...master
+[Unreleased]: https://gitlab.com/yaq/yaqd-zaber/-/compare/v2021.10.0...main
 [2021.10.0]: https://gitlab.com/yaq/yaqd-zaber/-/compare/v2020.12.0...v2021.10.0
 [2020.12.0]: https://gitlab.com/yaq/yaqd-zaber/-/compare/v2020.07.0...v2020.12.0
 [2020.07.0]: https://gitlab.com/yaq/yaqd-zaber/-/compare/v2020.06.0...v2020.07.0
