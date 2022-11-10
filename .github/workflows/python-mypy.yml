@@ -20,4 +20,4 @@ jobs:
         python -m pip install .
     - name: Run mypy
       run: |
-        mypy {{cookiecutter.project_src_dir}}
+        mypy yaqd_zaber
