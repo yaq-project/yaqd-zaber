@@ -1,0 +1,10 @@
+[shared-settings]
+serial_port="COM4"
+
+[phi]
+axis=1
+port=36532
+
+[theta]
+axis=2
+port=36533

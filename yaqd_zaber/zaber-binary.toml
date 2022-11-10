@@ -3,11 +3,13 @@ doc = """
 Daemon for products using Zaber Technologies binary serial interface
 """
 traits = ["has-limits", "is-homeable", "uses-uart", "is-daemon"]
+hardware = ["zaber:t-mm2"]
 
 [links]
 source = "https://gitlab.com/yaq/yaqd-zaber/"
 bugtracker = "https://gitlab.com/yaq/yaqd-zaber/issues"
 manufacturer = "https://www.zaber.com/wiki/Manuals/Binary_Protocol_Manual"
+example-configs = "https://github.com/yaq-project/yaqd-zaber/tree/main/example-yaq-configs/zaber-binary"
 
 [config]
 axis.type = "int"
