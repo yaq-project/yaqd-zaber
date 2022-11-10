@@ -3,6 +3,7 @@ doc = """
 Daemon for products using Zaber Technologies binary serial interface
 """
 traits = ["has-limits", "is-homeable", "uses-uart", "is-daemon"]
+hardware = ["zaber:t-mm2"]
 
 [links]
 source = "https://gitlab.com/yaq/yaqd-zaber/"
