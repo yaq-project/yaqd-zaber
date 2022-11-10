@@ -98,6 +98,9 @@
         }
     },
     "doc": "Daemon for products using Zaber Technologies binary serial interface\n",
+    "hardware": [
+        "zaber:t-mm2"
+    ],
     "installation": {
         "PyPI": "https://pypi.org/project/yaqd-zaber"
     },
